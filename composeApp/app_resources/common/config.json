@@ -1,0 +1,6 @@
+{
+	"ScannerUrl":"https://localhost:8090/api/v1/",
+    "StartScannerUrl": "https://localhost:8090/api/v1/triggernewdocument",
+    "StopScannerUrl": "https://localhost:8090/api/v1/cancelnewdocument"	
+}
+
