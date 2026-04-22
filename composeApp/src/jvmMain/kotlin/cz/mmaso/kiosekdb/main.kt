@@ -61,6 +61,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
+import io.ktor.server.response.respondTextWriter
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -89,6 +90,7 @@ import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.Locale
 import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.sound.sampled.AudioSystem
 import kotlin.io.println
@@ -336,7 +338,6 @@ fun main() = application {
 
     // Implementuje jednoduchy server na praci s cteckou pasu
     val server = remember {
-
         embeddedServer(
             factory = Netty,
             applicationEnvironment {
@@ -431,15 +432,25 @@ private fun ApplicationEngine.Configuration.envConfig() {
             }
 
             connector {
-                port = 8080
+                port = 53045
             }
             sslConnector(
                 keyStore = keyStore,
                 keyAlias = "sampleAlias",
                 keyStorePassword = { "123456".toCharArray() },
                 privateKeyPassword = { "foobar".toCharArray() }) {
+
                 port = 8443
                 keyStorePath = keyStoreFile
+
+                val trustAll = arrayOf<TrustManager>(object : X509TrustManager {
+                    override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                    override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                })
+
+                val sslContext = SSLContext.getInstance("TLS")
+                sslContext.init(null, trustAll, SecureRandom())
             }
         }
     }
@@ -454,17 +465,21 @@ fun Application.module() {
             call.respondText("Hello, world!")
         }
         post("/DocumentScan_axd") {
-            // val ss = call.receive<String>()
-            // println(ss)
+            println("DocumentScan_axd")
+            val ss = call.receive<String>()
+            println(ss)
+
+            /*
             try {
                 val passport = call.receive<Passport>()
                 println("--- Passport received ${passport}")
                 PassportScannerBroker.addRequest(passport)
             }catch (e: Exception) {
                 e.printStackTrace()
-            }
+            }*/
 
-            call.respond(HttpStatusCode.OK)
+            call.respondText("JSON OK", ContentType.Text.Plain)
+            // call.respond(HttpStatusCode.OK)
         }
     }
 }

@@ -8,6 +8,7 @@ import cz.mmaso.kiosekdb.AppConfig
 import cz.mmaso.kiosekdb.Passport
 import cz.mmaso.kiosekdb.VIRTUAL_KEYS
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +17,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ScannerResponse(
+    val method: String,
+    val status: String,
+)
 
 class AppViewModel( val config: AppConfig, val httpClient: HttpClient ) : ViewModel() {
 
@@ -43,11 +51,10 @@ class AppViewModel( val config: AppConfig, val httpClient: HttpClient ) : ViewMo
         viewModelScope.launch(Dispatchers.IO ) {
             println("--- startScanner")
             try {
-                val response = httpClient.get(config.StartScannerUrl)
-                if (response.status == HttpStatusCode.OK) {
+                val resp:ScannerResponse = httpClient.get(config.StartScannerUrl).body()
+                if( resp.status == "OK" ) {
+                    println("${resp.method} - ${resp.status}")
                     _scannerIsReady.value = true
-                } else {
-                    _scannerIsReady.value = false
                 }
             }catch (e: Exception){
                 println( e.message )
@@ -60,10 +67,16 @@ class AppViewModel( val config: AppConfig, val httpClient: HttpClient ) : ViewMo
         viewModelScope.launch(Dispatchers.IO ) {
             println("--- stopScanner")
             try {
+                val resp:ScannerResponse = httpClient.get(config.StopScannerUrl).body()
+                if( resp.status == "OK" ) {
+                    println("${resp.method} - ${resp.status}")
+                    _scannerIsReady.value = false
+                }
+                /*
                 val response = httpClient.get(config.StopScannerUrl)
                 if (response.status == HttpStatusCode.OK) {
                     _scannerIsReady.value = false
-                }
+                }*/
             }catch (e: Exception){
                 println( e.message )
             }

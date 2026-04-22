@@ -8,8 +8,8 @@ import java.io.File
 data class AppConfig(
     val ScannerUrl: String = "https://localhost:8080/",
     val ApiUrl: String = "https://localhost:8080/",
-    val StartScannerUrl: String = "https://localhost:8080/api/v1/triggernewdocument",
-    val StopScannerUrl: String = "https://localhost:8080/api/v1/cancelnewdocument",
+    val StartScannerUrl: String = "https://localhost:8090/api/v1/triggernewdocument",
+    val StopScannerUrl: String = "https://localhost:8090/api/v1/cancelnewdocument",
 )
 
 object ConfigManager {
