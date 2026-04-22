@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,8 +29,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -41,15 +46,21 @@ import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -88,6 +99,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
@@ -128,6 +140,7 @@ import kiosekdb.composeapp.generated.resources.UserIdentificationPageHelpText1
 import kiosekdb.composeapp.generated.resources.UserMasterPageLabel01
 import kiosekdb.composeapp.generated.resources.UserProtokolPageLabel
 import kiosekdb.composeapp.generated.resources.UserReceiptPageLabel
+import kiosekdb.composeapp.generated.resources.UserReceiptPageLabelNext
 import kiosekdb.composeapp.generated.resources.cestina
 import kiosekdb.composeapp.generated.resources.china
 import kiosekdb.composeapp.generated.resources.china_flag
@@ -1014,29 +1027,32 @@ fun KodLetuScreen( model:AppViewModel, navController: NavHostController ) {
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth( 0.6f )
+                    .fillMaxWidth( 1f )
                     .fillMaxHeight()
-                    .border( 1.dp, Color.Gray )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Spacer(modifier = Modifier.size(64.dp))
-                    Row {
+                    Row(
+                        modifier = Modifier
+                            .offset( x = -64.dp)
+                    ) {
                         Column {
                             Icon(
                                 modifier = Modifier.size(128.dp),
-                                imageVector = Icons.Default.Person,
+                                imageVector = Icons.Default.Flight,
                                 contentDescription = null,
                                 tint = blue
                             )
                         }
                         Spacer(modifier = Modifier.size(32.dp))
                         Column(
-                            modifier = Modifier.fillMaxWidth(0.6f),
+                            modifier = Modifier.fillMaxWidth(0.3f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -1063,31 +1079,42 @@ fun KodLetuScreen( model:AppViewModel, navController: NavHostController ) {
                             model.processKbCtrl(it)
                         })
                 }
-                Row( modifier = Modifier.fillMaxWidth().border( 1.dp, Color.Gray )) {
+                Row( modifier = Modifier.fillMaxWidth()) {
+                    Spacer( Modifier.size(16.dp))
                     Button(
                         modifier = Modifier
                             .weight(0.5f)
-                            .height(48.dp)
-                            .background( Color.White, RoundedCornerShape(6.dp ))
-                            .border( 1.dp, Color.Gray ),
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor   = Color.Black,
+                        ),
                         onClick = {
 
-                        }
+                        },
+                        shape = RoundedCornerShape(6.dp )
                     ) {
-                        Text( "AAA")
+                        Icon( imageVector = Icons.Default.Home, modifier = Modifier.size(38.dp), contentDescription = null, tint = blue )
                     }
-
+                    Spacer( Modifier.size(8.dp))
                     Button(
                         modifier = Modifier
                             .weight(0.5f)
-                            .height(48.dp)
-                            .background( Color.White, RoundedCornerShape(6.dp )),
+                            .height(56.dp),
                         onClick = {
 
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = blue,
+                            contentColor   = Color.White,
+                        ),
+                        shape = RoundedCornerShape(6.dp )
                     ) {
-                        Text( "BBB")
+                        Icon( imageVector = Icons.Default.Keyboard, modifier = Modifier.size(38.dp), contentDescription = null, tint = Color.White )
+                        Spacer( Modifier.size(8.dp))
+                        Text( stringResource(Res.string.UserReceiptPageLabelNext), fontSize = 20.sp)
                     }
+                    Spacer( Modifier.size(16.dp))
                 }
             }
         }
@@ -1097,21 +1124,115 @@ fun KodLetuScreen( model:AppViewModel, navController: NavHostController ) {
 
 @Composable
 fun SeznamUctenekScreen( model:AppViewModel, navController: NavHostController ) {
+    val items = remember { mutableStateOf<List<String>>( listOf()) }
+    val listState = rememberLazyListState()
+
+    LaunchedEffect( Unit ) {
+        items.value = mutableListOf( "111", "222", "333", "444", "555", "666", "777", "888", "999" )
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon( modifier = Modifier.size(128.dp), imageVector = Icons.Default.Person, contentDescription = null, tint = blue )
-            Spacer(modifier = Modifier.size(64.dp))
-            Text(
-                text = "Naskenujte osobní údaje z pasu",
-                fontSize = 64.sp,
-                fontWeight = FontWeight.Bold,
-                color = blue
-            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    modifier = Modifier.size(128.dp),
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    tint = blue
+                )
+                Spacer(modifier = Modifier.size(64.dp))
+                Text(
+                    text = stringResource(Res.string.UserReceiptPageLabel),
+                    fontSize = 64.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = blue
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .fillMaxHeight(0.7f)
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().weight(1f),
+                    state = listState,
+                ) {
+                    items(items = items.value) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .padding(2.dp)
+                                .clickable {
+
+                                },
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(Color.Red)
+                                        .width(16.dp)
+                                        .fillMaxHeight()
+                                ) {
+                                }
+
+                                Row(
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    horizontalArrangement = Arrangement.SpaceAround,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Spacer(Modifier.size(16.dp))
+
+                                    Column(Modifier.weight(1.3f)) {
+                                        Text("Název:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                                        Text("Company 1", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                                    }
+
+                                    Column(Modifier.weight(0.5f)) {
+                                        Text("VAT/DIČ:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                                        Text("CZ12345678", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                                    }
+
+                                    Column(Modifier.weight(0.5f)) {
+                                        Text("Č.účtenky:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                                        Text("105896587", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                                    }
+
+                                    Column(Modifier.weight(0.5f)) {
+                                        Text("AAAA")
+                                        Text("AAAA")
+                                    }
+
+                                    Column(Modifier.weight(0.5f)) {
+                                        Text("AAAA")
+                                        Text("AAAA")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                VerticalScrollbar(
+                    modifier = Modifier
+                        .fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(
+                        scrollState = listState
+                    )
+                )
+            }
         }
     }
 }
@@ -1470,4 +1591,4 @@ fun App() {
 }
 
 // https://127.0.0.1:8443/DocumentScan_axd
-
+//
