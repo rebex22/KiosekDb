@@ -21,7 +21,9 @@ import cz.mmaso.kiosekdb.db.Tasks
 import cz.mmaso.kiosekdb.db.VatRefund
 import cz.mmaso.kiosekdb.module
 import cz.mmaso.kiosekdb.scanner.PassportScannerBroker
+import cz.mmaso.kiosekdb.viewModels.ScannerResponse
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpTimeout
@@ -36,6 +38,7 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.accept
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.Cookie
@@ -71,6 +74,7 @@ import kiosekdb.composeapp.generated.resources.DefaultPageTitle
 import kiosekdb.composeapp.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -95,6 +99,7 @@ import javax.net.ssl.X509TrustManager
 import javax.sound.sampled.AudioSystem
 import kotlin.io.println
 import kotlin.jvm.java
+import kotlin.time.Duration.Companion.milliseconds
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ServerContentNegotiation
 
@@ -440,7 +445,7 @@ private fun ApplicationEngine.Configuration.envConfig() {
                 keyStorePassword = { "123456".toCharArray() },
                 privateKeyPassword = { "foobar".toCharArray() }) {
 
-                port = 8443
+                port = 7152
                 keyStorePath = keyStoreFile
 
                 val trustAll = arrayOf<TrustManager>(object : X509TrustManager {
@@ -464,24 +469,70 @@ fun Application.module() {
         get("/") {
             call.respondText("Hello, world!")
         }
-        post("/DocumentScan_axd") {
-            println("DocumentScan_axd")
+        post("/DocumentScan.axd") {
+            println("DocumentScan.axd")
+            /*
             val ss = call.receive<String>()
             println(ss)
+            if( !ss.isNullOrEmpty()) {
+                delay(500L.milliseconds)
+                startScanner()
+            }
+            */
 
-            /*
             try {
                 val passport = call.receive<Passport>()
                 println("--- Passport received ${passport}")
                 PassportScannerBroker.addRequest(passport)
             }catch (e: Exception) {
                 e.printStackTrace()
-            }*/
+            }
 
             call.respondText("JSON OK", ContentType.Text.Plain)
-            // call.respond(HttpStatusCode.OK)
+        }
+        post("/DocumentScan_axd") {
+            println("DocumentScan_axd")
+            /*
+            val ss = call.receive<String>()
+            println(ss)
+            if( !ss.isNullOrEmpty()) {
+                delay(500L.milliseconds)
+                startScanner()
+            }*/
+
+            try {
+                val passport = call.receive<Passport>()
+                println("--- Passport received ${passport}")
+                PassportScannerBroker.addRequest(passport)
+            }catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            call.respondText("JSON OK", ContentType.Text.Plain)
         }
     }
+}
+
+suspend fun startScanner() : Boolean {
+    val httpClient = getHttpClient()
+    val resp:ScannerResponse? = httpClient.get("https://localhost:8090/api/v1/triggernewdocument").body()
+    resp?.let {
+        if( it.status == "OK" ) {
+            return true
+        }
+    }
+    return false
+}
+
+suspend fun stopScanner() : Boolean {
+    val httpClient = getHttpClient()
+    val resp:ScannerResponse? = httpClient.get("https://localhost:8090/api/v1/cancelnewdocument").body()
+    resp?.let {
+        if( it.status == "OK" ) {
+            return true
+        }
+    }
+    return false
 }
 
 suspend fun playSound(resourcePath: String) {

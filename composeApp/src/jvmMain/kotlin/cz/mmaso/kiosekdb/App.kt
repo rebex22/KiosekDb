@@ -2,6 +2,7 @@ package cz.mmaso.kiosekdb
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -58,6 +59,7 @@ import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -1169,60 +1171,7 @@ fun SeznamUctenekScreen( model:AppViewModel, navController: NavHostController ) 
                     state = listState,
                 ) {
                     items(items = items.value) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(80.dp)
-                                .padding(2.dp)
-                                .clickable {
-
-                                },
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .background(Color.Red)
-                                        .width(16.dp)
-                                        .fillMaxHeight()
-                                ) {
-                                }
-
-                                Row(
-                                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                                    horizontalArrangement = Arrangement.SpaceAround,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Spacer(Modifier.size(16.dp))
-
-                                    Column(Modifier.weight(1.3f)) {
-                                        Text("Název:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
-                                        Text("Company 1", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                                    }
-
-                                    Column(Modifier.weight(0.5f)) {
-                                        Text("VAT/DIČ:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
-                                        Text("CZ12345678", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                                    }
-
-                                    Column(Modifier.weight(0.5f)) {
-                                        Text("Č.účtenky:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
-                                        Text("105896587", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                                    }
-
-                                    Column(Modifier.weight(0.5f)) {
-                                        Text("AAAA")
-                                        Text("AAAA")
-                                    }
-
-                                    Column(Modifier.weight(0.5f)) {
-                                        Text("AAAA")
-                                        Text("AAAA")
-                                    }
-                                }
-                            }
-                        }
+                        ExpandableItem( it )
                     }
                 }
                 VerticalScrollbar(
@@ -1232,6 +1181,111 @@ fun SeznamUctenekScreen( model:AppViewModel, navController: NavHostController ) 
                         scrollState = listState
                     )
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpandableItem( v: String ) {
+    var expanded by remember { mutableStateOf(false ) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+            .clickable {
+                expanded = !expanded
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors( containerColor = Color.White )
+    ) {
+        Column( modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            ),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(Color.Red)
+                        .width(16.dp)
+                        .height(32.dp)
+                ) {
+                }
+
+                Row(
+                    modifier = Modifier.weight(1f).padding( 8.dp ),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(Modifier.size(16.dp))
+
+                    Column(Modifier.weight(1.3f)) {
+                        Text("Název:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                        Text("Company 1", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    }
+
+                    Column(Modifier.weight(0.5f)) {
+                        Text("VAT/DIČ:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                        Text("CZ12345678", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    }
+
+                    Column(Modifier.weight(0.5f)) {
+                        Text("Č.účtenky:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                        Text("105896587", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    }
+
+                    Column(Modifier.weight(0.5f)) {
+                        Text("∑ účtenky")
+                        Text("1 503,00")
+                    }
+
+                    Column(Modifier.weight(0.5f)) {
+                        Text("∑ položek")
+                        Text("4")
+                    }
+
+                    Column(Modifier.weight(0.5f)) {
+                        Text("Datum nákupu")
+                        Text("14.04.2026")
+                    }
+
+                    Column(
+                        Modifier.weight(0.2f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("Stav")
+                        Icon(
+                            modifier = Modifier.size(38.dp),
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color.Green
+                        )
+                    }
+                }
+            }
+            if( expanded )
+            {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Tady je detailní popis položky, který se objeví až po kliknutí. " +
+                                "Díky modifikátoru animateContentSize je rozbalení plynulé.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
