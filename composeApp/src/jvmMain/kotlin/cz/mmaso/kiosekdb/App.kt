@@ -1214,77 +1214,82 @@ fun ExpandableItem( v: String ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
             ) {
                 Box(
                     modifier = Modifier
                         .background(Color.Red)
                         .width(16.dp)
-                        .height(32.dp)
+                        .fillMaxHeight()
                 ) {
                 }
 
-                Row(
-                    modifier = Modifier.weight(1f).padding( 8.dp ),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Spacer(Modifier.size(16.dp))
-
-                    Column(Modifier.weight(1.3f)) {
-                        Text("Název:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
-                        Text("Company 1", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    }
-
-                    Column(Modifier.weight(0.5f)) {
-                        Text("VAT/DIČ:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
-                        Text("CZ12345678", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    }
-
-                    Column(Modifier.weight(0.5f)) {
-                        Text("Č.účtenky:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
-                        Text("105896587", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    }
-
-                    Column(Modifier.weight(0.5f)) {
-                        Text("∑ účtenky")
-                        Text("1 503,00")
-                    }
-
-                    Column(Modifier.weight(0.5f)) {
-                        Text("∑ položek")
-                        Text("4")
-                    }
-
-                    Column(Modifier.weight(0.5f)) {
-                        Text("Datum nákupu")
-                        Text("14.04.2026")
-                    }
-
-                    Column(
-                        Modifier.weight(0.2f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("Stav")
-                        Icon(
-                            modifier = Modifier.size(38.dp),
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = Color.Green
-                        )
-                    }
-                }
-            }
-            if( expanded )
-            {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier.weight(1f).padding(8.dp),
+                    verticalArrangement = Arrangement.Center,
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Tady je detailní popis položky, který se objeví až po kliknutí. " +
-                                "Díky modifikátoru animateContentSize je rozbalení plynulé.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        // verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(Modifier.size(16.dp))
+
+                        Column(Modifier.weight(1.3f)) {
+                            Text("Název:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                            Text("Company 1", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        }
+
+                        Column(Modifier.weight(0.5f)) {
+                            Text("VAT/DIČ:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                            Text("CZ12345678", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        }
+
+                        Column(Modifier.weight(0.5f)) {
+                            Text("Č.účtenky:", fontStyle = FontStyle.Italic, fontSize = 16.sp)
+                            Text("105896587", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        }
+
+                        Column(Modifier.weight(0.5f)) {
+                            Text("∑ účtenky")
+                            Text("1 503,00")
+                        }
+
+                        Column(Modifier.weight(0.5f)) {
+                            Text("∑ položek")
+                            Text("4")
+                        }
+
+                        Column(Modifier.weight(0.5f)) {
+                            Text("Datum nákupu")
+                            Text("14.04.2026")
+                        }
+
+                        Column(
+                            Modifier.weight(0.2f),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("Stav")
+                            Icon(
+                                modifier = Modifier.size(38.dp),
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = Color.Green
+                            )
+                        }
+                    }
+                    if( expanded )
+                    {
+                        Column(
+                        ) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Tady je detailní popis položky, který se objeví až po kliknutí. " +
+                                        "Díky modifikátoru animateContentSize je rozbalení plynulé.",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
                 }
             }
         }
